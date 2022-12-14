@@ -1,49 +1,36 @@
-class DiscordRichPresenceExtension {
-  // Tell Scratch about the extension
+class ScreenshotExtension {
   getInfo() {
     return {
-      id: 'discordrichpresence',
-      name: 'Discord Rich Presence',
+      id: 'screenshot',
+      name: 'Screenshot',
       blocks: [
         {
-          opcode: 'updatePresence',
+          opcode: 'screenshot',
           blockType: Scratch.BlockType.COMMAND,
-          text: 'Update Discord presence with [DETAILS] and [STATE]'
+          text: 'Take Screenshot'
         }
       ]
     };
   }
 
-  // Define the updatePresence method
-  updatePresence(args) {
-    // Get the details and state from the block arguments
-    const details = args.DETAILS;
-    const state = args.STATE;
+  screenshot() {
+    // Use the HTML5 Canvas API to create a screenshot of the current screen
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    context.drawImage(document.body, 0, 0);
 
-    // Use the electron-store package to get the user's client ID
-    // If it's not stored yet, prompt the user to enter it
-    const Store = require('electron-store');
-    const store = new Store();
-    let clientId = store.get('clientId');
-    if (!clientId) {
-      clientId = window.prompt('Please enter your Discord client ID:');
-      store.set('clientId', clientId);
-    }
+    // Generate a download link for the screenshot
+    const link = document.createElement('a');
+    link.download = 'screenshot.png';
+    link.href = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
 
-    // Use the Discord Rich Presence API to update the user's presence
-    const Discord = require('discord-rpc');
-    const client = new Discord.Client({ transport: 'ipc' });
-
-    client.on('ready', () => {
-      client.setActivity({
-        details: details,
-        state: state
-      });
-    });
-
-    client.login({ clientId: clientId });
+    // Download the screenshot by simulating a click on the download link
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 }
 
-// Register the extension
-Scratch.extensions.register(new DiscordRichPresenceExtension());
+Scratch.extensions.register(new ScreenshotExtension());
