@@ -1,36 +1,42 @@
-class ScreenshotExtension {
+class MyExtension {
   getInfo() {
     return {
-      id: 'screenshot',
-      name: 'Screenshot',
+      id: 'myextensionexample',
+      name: 'Cool Extension',
       blocks: [
         {
-          opcode: 'screenshot',
+          opcode: 'sayHello',
           blockType: Scratch.BlockType.COMMAND,
-          text: 'Take Screenshot'
+          text: 'Say Hello'
+        },
+        {
+          opcode: 'clearScreen',
+          blockType: Scratch.BlockType.COMMAND,
+          text: 'Clear Screen'
         }
       ]
     };
   }
 
-  screenshot() {
-    // Use the HTML5 Canvas API to create a screenshot of the current screen
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    context.drawImage(document.body, 0, 0);
+  sayHello() {
+    // Create a new div element
+    let div = document.createElement('div');
+    // Set the text to display
+    div.innerText = 'Hello, world!';
+    // Style the div so it's positioned in the corner of the screen
+    div.style.position = 'absolute';
+    div.style.top = 0;
+    div.style.right = 0;
+    // Append the div to the body of the page
+    document.body.appendChild(div);
+  }
 
-    // Generate a download link for the screenshot
-    const link = document.createElement('a');
-    link.download = 'screenshot.png';
-    link.href = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
-
-    // Download the screenshot by simulating a click on the download link
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  clearScreen() {
+    // Select all div elements on the page
+    let divs = document.querySelectorAll('div');
+    // Remove each div
+    divs.forEach(div => div.remove());
   }
 }
 
-Scratch.extensions.register(new ScreenshotExtension());
+Scratch.extensions.register(new MyExtension());
