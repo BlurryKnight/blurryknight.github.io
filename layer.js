@@ -16,10 +16,10 @@
     };
   };
 
-  // Wait for the Scratch editor to finish loading
-  Scratch.vm.on('ready', () => {
+  // Wait for the Scratch.VM object to be defined
+  window.addEventListener('scratchLoaded', () => {
     // Get a reference to the vm object
-    const vm = Scratch.vm;
+    const vm = new Scratch.VM();
 
     // Implement the layer behavior for all existing targets
     vm.runtime.targets.forEach((target) => implementLayerForTarget(target));
