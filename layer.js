@@ -1,64 +1,71 @@
 (function (Scratch) {
   'use strict';
 
-  const LAYER = Symbol('layer');
-
-  /**
-   * @param {VM.RenderedTarget} target
-   */
+  // Define a function to implement the layer behavior for a target
   const implementLayerForTarget = (target, originalTarget) => {
+    // Define a symbol to store the layer value for each target
+    const LAYER = Symbol('layer');
+
+    // Initialize the layer value for the target
     target[LAYER] = originalTarget ? originalTarget[LAYER] : 0;
 
+    // Override the _getRenderOrder method to return the target's layer value
     const original = target._getRenderOrder;
     target._getRenderOrder = function () {
       return this[LAYER];
     };
   };
 
-  const vm = Scratch.vm;
-  vm.runtime.targets.forEach((target) => implementLayerForTarget(target));
-  vm.runtime.on('targetWasCreated', (target, originalTarget) => implementLayerForTarget(target, originalTarget));
-  vm.runtime.on('PROJECT_LOADED', () => {
+  // Wait for the Scratch editor to finish loading
+  Scratch.vm.on('ready', () => {
+    // Get a reference to the vm object
+    const vm = Scratch.vm;
+
+    // Implement the layer behavior for all existing targets
     vm.runtime.targets.forEach((target) => implementLayerForTarget(target));
+
+    // Implement the layer behavior for any new targets that are created
+    vm.runtime.on('targetWasCreated', (target, originalTarget) => implementLayerForTarget(target, originalTarget));
+
+    // Implement the layer behavior for all targets when a project is loaded
+    vm.runtime.on('PROJECT_LOADED', () => {
+      vm.runtime.targets.forEach((target) => implementLayerForTarget(target));
+    });
+
+    // Define the extension's blocks
+    const blocks = {
+      setLayer: {
+        opcode: 'setLayer',
+        blockType: Scratch.BlockType.COMMAND,
+        text: 'set layer to [LAYER]',
+        arguments: {
+          LAYER: {
+            type: Scratch.ArgumentType.NUMBER,
+            defaultValue: 0,
+          },
+        },
+      },
+      getLayer: {
+        opcode: 'getLayer',
+        blockType: Scratch.BlockType.REPORTER,
+        text: 'layer',
+        disableMonitor: true,
+      },
+    };
+
+    // Define the extension's functions
+    const functions = {
+      setLayer: function (args, util) {
+        // Set the target's layer value to the specified value
+        util.target[LAYER] = +args.LAYER || 0;
+      },
+      getLayer: function (args, util) {
+        // Return the target's layer value
+        return util.target[LAYER];
+      },
+    };
+
+    // Register the extension
+    Scratch.extensions.register(new Scratch.Extension(blocks, functions));
   });
-
-  class Layer {
-    getInfo() {
-      return {
-        id: 'layer',
-        name: 'Layer',
-        color1: '#4287f5',
-        color2: '#2b62ba',
-        color3: '#204785',
-        blocks: [
-          {
-            opcode: 'setLayer',
-            blockType: Scratch.BlockType.COMMAND,
-            text: 'set layer to [LAYER]',
-            arguments: {
-              LAYER: {
-                type: Scratch.ArgumentType.NUMBER,
-                defaultValue: 0,
-              },
-            },
-          },
-          {
-            opcode: 'getLayer',
-            blockType: Scratch.BlockType.REPORTER,
-            text: 'layer',
-            disableMonitor: true,
-          },
-        ],
-      };
-    }
-    setLayer(args, util) {
-      // TODO: move to Scratch.Cast when it's merged
-      util.target[LAYER] = +args.LAYER || 0;
-    }
-    getLayer(args, util) {
-      return util.target[LAYER];
-    }
-  }
-
-  Scratch.extensions.register(new Layer());
 })(Scratch);
