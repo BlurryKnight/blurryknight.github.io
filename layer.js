@@ -8,18 +8,20 @@
         return {status: 2, msg: 'Ready'};
     };
 
-    ext.get_layer = function(sprite) {
-        // Return the current layer of the sprite
-        return sprite.layer;
+    ext.get_my_layer = function() {
+        // Get the current script context
+        var ctx = this;
+        // Return the layer of the sprite that the block is placed in
+        return ctx.executor.sprite.layer;
     };
 
     // Block and block menu descriptions
     var descriptor = {
         blocks: [
-            ['r', 'layer of %s', 'get_layer', 'Sprite1']
+            ['r', 'my layer', 'get_my_layer']
         ]
     };
 
     // Register the extension
-    ScratchExtensions.register('Get Layer Extension', descriptor, ext);
+    ScratchExtensions.register('Get My Layer Extension', descriptor, ext);
 })({});
